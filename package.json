@@ -1,0 +1,19 @@
+{
+  "name": "backend-course-2025-4",
+  "version": "1.0.0",
+  "description": "Lab 4 for Alex Chmihalo",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/elKINTARO/backend-course-2025-4.git"
+  },
+  "author": "Fedotov Kiril",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/elKINTARO/backend-course-2025-4/issues"
+  },
+  "homepage": "https://github.com/elKINTARO/backend-course-2025-4#readme"
+}
