@@ -4,8 +4,9 @@ const fs = require('fs').promises;
 const fsSync = require('fs');
 const { XMLBuilder } = require('fast-xml-parser');
 const url = require('url');
+//всякі імпорти
 
-// Налаштування параметрів командного рядка
+//параметри які я юзаю в кр
 program
   .requiredOption('-i, --input <path>', 'шлях до файлу для читання')
   .requiredOption('-h, --host <address>', 'адреса сервера')
@@ -15,13 +16,13 @@ program.parse(process.argv);
 
 const options = program.opts();
 
-// Перевірка існування вхідного файлу
+//перевірка існування вхідного файлу
 if (!fsSync.existsSync(options.input)) {
   console.error('Cannot find input file');
   process.exit(1);
 }
 
-// Налаштування XML builder
+//настройка хмл білдера
 const xmlBuilder = new XMLBuilder({
   ignoreAttributes: false,
   format: true,
@@ -29,30 +30,30 @@ const xmlBuilder = new XMLBuilder({
   suppressEmptyNode: true
 });
 
-// Функція для читання та обробки NDJSON
+//вже сама функція читання і обробки жейсон
 async function processRequest(queryParams) {
   try {
-    // Читання NDJSON файлу (кожен рядок - окремий JSON)
+    //читання нашого нджейсон
     const data = await fs.readFile(options.input, 'utf-8');
     const lines = data.trim().split('\n');
     const passengers = lines.map(line => JSON.parse(line));
 
-    // Фільтрація даних відповідно до параметрів
+    //фільтрація згідно параметрів
     let filteredData = passengers;
 
-    // Фільтр: показувати лише тих, хто вижив
+    //фільтр виживших
     if (queryParams.survived === 'true') {
       filteredData = filteredData.filter(p => p.Survived === '1' || p.Survived === 1);
     }
 
-    // Формування результату
+    //формулювання результу
     const result = filteredData.map(passenger => {
       const passengerData = {
         name: passenger.Name,
         ticket: passenger.Ticket
       };
 
-      // Додавання віку, якщо параметр age=true
+      //якщо вік=тру то виводимо 
       if (queryParams.age === 'true') {
         passengerData.age = passenger.Age;
       }
@@ -60,7 +61,7 @@ async function processRequest(queryParams) {
       return passengerData;
     });
 
-    // Формування XML
+    //формування хмл
     const xmlData = {
       passengers: {
         passenger: result
@@ -73,31 +74,31 @@ async function processRequest(queryParams) {
   }
 }
 
-// Створення HTTP сервера
+//створення хттп серврера
 const server = http.createServer(async (req, res) => {
   try {
-    // Парсинг URL та query параметрів
+    //парсимо урл і дістаємо параметри
     const parsedUrl = url.parse(req.url, true);
     const queryParams = parsedUrl.query;
 
-    // Обробка запиту та отримання XML
+    //обробка запиту та отримання хмл відп
     const xmlResponse = await processRequest(queryParams);
 
-    // Відправка відповіді
+    //відправка відп
     res.writeHead(200, { 
       'Content-Type': 'application/xml; charset=utf-8',
       'Access-Control-Allow-Origin': '*'
     });
     res.end(xmlResponse);
   } catch (error) {
-    // Обробка помилок
+    //обробочка помилочок
     res.writeHead(500, { 'Content-Type': 'text/plain; charset=utf-8' });
     res.end(`Помилка сервера: ${error.message}`);
     console.error('Помилка:', error);
   }
 });
 
-// Запуск сервера
+//запуск сервера та трошки інфи в консоль для юзера(мене)
 server.listen(options.port, options.host, () => {
   console.log(`Сервер запущено на http://${options.host}:${options.port}`);
   console.log(`Використовується файл: ${options.input}`);
@@ -110,7 +111,7 @@ server.listen(options.port, options.host, () => {
   console.log(`  http://${options.host}:${options.port}/?survived=true&age=true`);
 });
 
-// Обробка помилок сервера
+//обробочка помилочок сервера
 server.on('error', (err) => {
   console.error('Помилка сервера:', err.message);
   process.exit(1);
